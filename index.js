@@ -120,7 +120,7 @@ function namedOrPositionalParamsFormatter (sql, values, tz) {
   
   var self = this;
   
-  if (Array.isArray(values))) {
+  if (Array.isArray(values)) {
     mysql.format(sql, values, tz)
   }
 
