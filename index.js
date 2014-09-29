@@ -89,7 +89,11 @@ adapter.createConnection = function createConnection(opts, callback) {
 
 inherits(MySQLConnection, Connection)
 function MySQLConnection (opts) {
-  Connection.call(this, {config: new ConnectionConfig(opts)})
+  var config = new ConnectionConfig(opts);
+  if (!config.queryFormat) {
+    config.queryFormat = namedOrPositionalParamsFormatter;
+  }
+  Connection.call(this, {config: config})
 }
 
 MySQLConnection.prototype.adapter = adapter
@@ -99,4 +103,29 @@ MySQLConnection.prototype.query = function (text, params, callback) {
   this.emit('query', stream)
   Connection.prototype.query.call(this, stream.query)
   return stream
+}
+
+/**
+ * When given an array of params, use the default behaviour.
+ * When given an object, replace named parameters of the form $name.
+ */
+function namedOrPositionalParamsFormatter (sql, values, tz) {
+  if (!values) {
+    return sql;
+  }
+
+  if (typeof values !== 'object') {
+    throw new TypeError('Invalid typeof query values "' + typeof values + '"');
+  }
+  
+  var self = this;
+  
+  if (Array.isArray(values))) {
+    mysql.format(sql, values, tz)
+  }
+
+  return sql.replace(/(\${1,2})(\w+)/g, function (_, dollars, name) {
+    var value = values[name];
+    return dollars.length === 2 ? mysql.escapeId(value) : mysql.escape(value);
+  });
 }
