@@ -27,7 +27,7 @@
     "inherits": "2.0.1"
   },
   "peerDependencies": {
-    "any-db": "~2.1.0"
+    "any-db": "~2.2.0"
   },
   "devDependencies": {
     "any-db-adapter-spec": "2.1.2"
